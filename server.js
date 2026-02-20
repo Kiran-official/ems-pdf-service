@@ -1,7 +1,5 @@
 import "dotenv/config";
 
-process.env.PUPPETEER_CACHE_DIR = "/tmp/puppeteer-cache";
-
 import express from "express";
 import puppeteer from "puppeteer";
 import { createClient } from "@supabase/supabase-js";
@@ -35,6 +33,7 @@ app.post("/generate", async (req, res) => {
     }
 
 const browser = await puppeteer.launch({
+  executablePath: puppeteer.executablePath(),
   headless: true,
   args: [
     "--no-sandbox",
