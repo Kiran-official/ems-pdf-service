@@ -1,7 +1,6 @@
 import express from "express";
 import puppeteer from "puppeteer";
 import { createClient } from "@supabase/supabase-js";
-process.env.PUPPETEER_CACHE_DIR = "/tmp/puppeteer-cache";
 
 const app = express();
 app.use(express.json({ limit: "5mb" }));
@@ -31,7 +30,7 @@ app.post("/generate", async (req, res) => {
     }
 
 const browser = await puppeteer.launch({
-  executablePath: puppeteer.executablePath(),
+  executablePath: "/usr/bin/chromium",
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -39,7 +38,7 @@ const browser = await puppeteer.launch({
     '--single-process',
     '--no-zygote'
   ],
-  headless: 'new'
+  headless: true
 });
 
     const page = await browser.newPage();
