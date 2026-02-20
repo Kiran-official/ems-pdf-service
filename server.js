@@ -30,14 +30,12 @@ app.post("/generate", async (req, res) => {
       return res.status(400).json({ error: "Missing html or path" });
     }
 
-    const browser = await puppeteer.launch({
+  const browser = await puppeteer.launch({
   headless: "new",
   args: [
     "--no-sandbox",
-    "--disable-setuid-sandbox",
-    "--disable-dev-shm-usage",
-  ],
-  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    "--disable-setuid-sandbox"
+  ]
 });
 
     const page = await browser.newPage();
