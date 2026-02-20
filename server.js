@@ -1,4 +1,7 @@
+import "dotenv/config";
+
 process.env.PUPPETEER_CACHE_DIR = "/tmp/puppeteer-cache";
+
 import express from "express";
 import puppeteer from "puppeteer";
 import { createClient } from "@supabase/supabase-js";
@@ -6,12 +9,13 @@ import { createClient } from "@supabase/supabase-js";
 const app = express();
 app.use(express.json({ limit: "5mb" }));
 
-const SUPABASE_URL = "https://hqvetmuoyshzonrlvolc.supabase.co";
-const SUPABASE_SERVICE_ROLE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxdmV0bXVveXNoem9ucmx2b2xjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTMyMzk2NiwiZXhwIjoyMDg2ODk5OTY2fQ.lSp-KanrIAV4jc4dRITqcVOFuIWMu_eL_XH1MgDOOHs";
-const INTERNAL_SECRET = "ems_internal_9xF2kL7pQz81Tn4";
+// ✅ Use environment variables (DO NOT hardcode secrets)
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
+const INTERNAL_SECRET = process.env.INTERNAL_SECRET;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE || !INTERNAL_SECRET) {
-  throw new Error("Missing environment variables");
+  throw new Error("Missing required environment variables");
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE);
@@ -31,18 +35,20 @@ app.post("/generate", async (req, res) => {
     }
 
 const browser = await puppeteer.launch({
+  headless: true,
   args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--single-process',
-    '--no-zygote'
-  ],
-  headless: 'new'
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu"
+  ]
 });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "domcontentloaded" });
+
+    await page.setContent(html, {
+      waitUntil: "domcontentloaded"
+    });
 
     const pdfBuffer = await page.pdf({
       format: "A4",
@@ -60,13 +66,14 @@ const browser = await puppeteer.launch({
       });
 
     if (error) {
+      console.error("Storage upload error:", error);
       return res.status(500).json({ error: error.message });
     }
 
     return res.json({ path });
 
   } catch (err) {
-    console.error(err);
+    console.error("PDF generation error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
