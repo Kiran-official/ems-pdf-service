@@ -33,7 +33,7 @@ app.post("/generate", async (req, res) => {
     }
 
 const browser = await puppeteer.launch({
-  executablePath: puppeteer.executablePath(),
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   headless: true,
   args: [
     "--no-sandbox",
